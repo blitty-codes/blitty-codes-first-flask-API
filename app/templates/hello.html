@@ -1,0 +1,14 @@
+<!--
+  Inside templates you also have access to the request, session and g 1 objects
+  as well as the get_flashed_messages() function.
+
+  https://flask.palletsprojects.com/en/1.1.x/patterns/templateinheritance/#template-inheritance
+-->
+
+<!doctype html>
+<title>Hello from Flask</title>
+{% if name %}
+  <h1>Hello {{ name }}!</h1>
+{% else %}
+  <h1>Hello, World!</h1>
+{% endif %}
