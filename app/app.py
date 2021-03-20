@@ -2,7 +2,7 @@
   Source: https://flask.palletsprojects.com/en/1.1.x/quickstart/
 '''
 
-from flask import Flask, request, jsonify, url_for, render_template, make_response
+from flask import Flask, request, jsonify, url_for, render_template, make_response, redirect, abort
 from markupsafe import escape
 from werkzeug.utils import secure_filename
 
@@ -128,6 +128,31 @@ def give_me_cookie():
 
 ##### NEXT
 ##### REDIRECTS AND ERRORS
+@app.route('/be_a_color', methods=['GET', 'POST'])
+def be_a_color():
+  if request.method == 'POST':
+    if request.form['color'] == '#ffffff':
+      abort(406)
+    
+    if request.form['color'] != None:
+      color = request.form['color'][1:]
+      print(color)
+      print(url_for('color', color_name=color))
+      return redirect(url_for('color', color_name=color))
+    else:
+      abort(418, description='You are a teapot')
+
+  return render_template('cp/color_picker.html')
+
+@app.route('/color/<string:color_name>')
+def color(color_name):
+  return render_template('cp/color.html', color=color_name)
+
+# instead of using default status codes pages, we can customize them and use them
+# (https://flask.palletsprojects.com/en/1.1.x/errorhandling/#error-handlers)
+@app.errorhandler(406)
+def white_color_not_allowed(error):
+  return render_template('cp/not_allowed.html'), 406 # the 406 here tells flask the status code of that page
 
 # url_for() you can use this, to get the current path to
 # a url, it is good, because you don't have to keep typing
