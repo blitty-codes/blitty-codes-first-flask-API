@@ -2,7 +2,7 @@
   Source: https://flask.palletsprojects.com/en/1.1.x/quickstart/
 '''
 
-from flask import Flask, request, jsonify, url_for, render_template, make_response, redirect, abort
+from flask import Flask, request, jsonify, url_for, render_template, make_response, redirect, abort, session
 from markupsafe import escape
 from werkzeug.utils import secure_filename
 
@@ -126,7 +126,6 @@ def give_me_cookie():
   name = request.cookies.get('nname')
   return render_template('hello.html', name=name)
 
-##### NEXT
 ##### REDIRECTS AND ERRORS
 @app.route('/be_a_color', methods=['GET', 'POST'])
 def be_a_color():
@@ -156,6 +155,49 @@ def white_color_not_allowed(error):
 
 # url_for() you can use this, to get the current path to
 # a url, it is good, because you don't have to keep typing
+
+##### APIs with JSON
+@app.route('/about_me')
+def about_me():
+  return {
+    'name': 'Blitty',
+    'shortcut': 'B',
+    'description': 'Just follow me on twitter @blit12_'
+  }
+
+##### Sessions
+# It is build in top of cookies and they can be seen, but not modify because you need the secret key
+# use this python -c 'import os; print(os.urandom(16))' to create random key
+app.secret_key = b'asdfiuq0r72o34r_"ff\xec' # octets
+
+@app.route('/candie')
+def candie():
+  if 'candie' in session:
+    return 'Logged as candie: %s' % escape(session['candie'])
+  return f'''
+    <h1>You have no candie :(</h1>
+    <p>Go to <a href="http://localhost:5000/{url_for('get_candie')}">{url_for('get_candie')}</a></p> '''
+
+@app.route('/get_candie', methods=['GET', 'POST'])
+def get_candie():
+    if request.method == 'POST':
+        session['candie'] = request.form['candie']
+        return redirect(url_for('candie'))
+    return '''
+        <form method="post">
+            <p><input type=text name=candie></p>
+            <p><input type=submit value=Login></p>
+        </form>
+    '''
+@app.route('/candie_out')
+def candie_out():
+  candie = session['candie']
+  session.pop('candie', None)
+  return redirect(url_for('chao', candieName=candie))
+
+@app.route('/chao/<string:candieName>')
+def chao(candieName):
+  return f'''<h1>See you later {candieName}!</h1>'''
 
 with app.test_request_context():
   print(url_for('login'))
